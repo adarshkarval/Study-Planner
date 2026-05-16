@@ -1,0 +1,201 @@
+#include<stdio.h>
+#include<string.h>
+
+#define MAX_SUBJECTS 10
+
+struct Subject{
+    char name[50];
+    int priority,completed;
+};
+
+struct Subject subjects[MAX_SUBJECTS];
+
+int totalSubjects=0,studyHours=0,daysLeft=0;
+
+void addSubjects(){
+    int i;
+
+    printf("\nEnter Number of Subjects: ");
+    scanf("%d",&totalSubjects);
+    getchar();
+
+    for(i=0;i<totalSubjects;i++){
+        printf("\nEnter Subject %d Name: ",i+1);
+
+        fgets(subjects[i].name,sizeof(subjects[i].name),stdin);
+
+        subjects[i].name[strcspn(subjects[i].name,"\n")]='\0';
+
+        printf("\nSelect Difficulty Level\n");
+        printf("1. Easy\n2. Medium\n3. Hard\n");
+
+        printf("Enter Choice: ");
+        scanf("%d",&subjects[i].priority);
+
+        getchar();
+
+        subjects[i].completed=0;
+    }
+
+    printf("\nSubjects Added Successfully!\n");
+}
+
+void setExamDate(){
+    int cd,cm,cy,ed,em,ey,currentTotalDays,examTotalDays;
+
+    printf("\n===== SET EXAM COUNTDOWN =====\n");
+
+    printf("\nEnter Current Date (DD MM YYYY): ");
+    scanf("%d%d%d",&cd,&cm,&cy);
+
+    printf("Enter Exam Date (DD MM YYYY): ");
+    scanf("%d%d%d",&ed,&em,&ey);
+
+    currentTotalDays=cd+(cm*30)+(cy*365);
+    examTotalDays=ed+(em*30)+(ey*365);
+
+    daysLeft=examTotalDays-currentTotalDays;
+
+    if(daysLeft<=0){
+        daysLeft=0;
+        printf("\nExam Date Already Passed!\n");
+    }
+    else printf("\nDays Left For Exam: %d\n",daysLeft);
+}
+
+void setStudyHours(){
+    printf("\nEnter Daily Study Hours: ");
+    scanf("%d",&studyHours);
+
+    printf("\nStudy Hours Saved Successfully!\n");
+}
+
+void generateStudyPlan(){
+    int i,totalWeight=0,allocatedDays[MAX_SUBJECTS],remainingDays;
+
+    if(totalSubjects==0){
+        printf("\nPlease Add Subjects First!\n");
+        return;
+    }
+
+    if(daysLeft==0){
+        printf("\nPlease Set Exam Countdown First!\n");
+        return;
+    }
+
+    printf("\n===== STUDY DAY SUMMARY =====\n");
+
+    for(i=0;i<totalSubjects;i++)
+        totalWeight+=subjects[i].priority;
+
+    for(i=0;i<totalSubjects;i++)
+        allocatedDays[i]=(subjects[i].priority*daysLeft)/totalWeight;
+
+    remainingDays=daysLeft;
+
+    for(i=0;i<totalSubjects;i++)
+        remainingDays-=allocatedDays[i];
+
+    i=0;
+
+    while(remainingDays>0){
+        allocatedDays[i]++;
+        remainingDays--;
+        i++;
+
+        if(i==totalSubjects)
+            i=0;
+    }
+
+    for(i=0;i<totalSubjects;i++){
+        printf("\n%s -> %d Days ",subjects[i].name,allocatedDays[i]);
+
+        if(subjects[i].priority==3)
+            printf("(Hard)");
+
+        else if(subjects[i].priority==2)
+            printf("(Medium)");
+
+        else printf("(Easy)");
+    }
+
+    printf("\n\nAll %d Days Successfully Utilized!\n",daysLeft);
+}
+
+void viewCountdown(){
+    printf("\n===== EXAM COUNTDOWN =====\n");
+
+    if(daysLeft==0)
+        printf("Countdown Not Set Yet!\n");
+
+    else printf("Only %d Days Left For Your Exam!\n",daysLeft);
+}
+
+void markProgress(){
+    int i,choice,completedCount=0;
+    float progress;
+
+    if(totalSubjects==0){
+        printf("\nPlease Add Subjects First!\n");
+        return;
+    }
+
+    printf("\n===== SUBJECT LIST =====\n");
+
+    for(i=0;i<totalSubjects;i++)
+        printf("%d. %s\n",i+1,subjects[i].name);
+
+    printf("\nEnter Subject Number Completed: ");
+    scanf("%d",&choice);
+
+    if(choice>=1 && choice<=totalSubjects){
+        subjects[choice-1].completed=1;
+        printf("\nMarked As Completed!\n");
+    }
+
+    else printf("\nInvalid Choice!\n");
+
+    for(i=0;i<totalSubjects;i++)
+        if(subjects[i].completed==1)
+            completedCount++;
+
+    progress=((float)completedCount/totalSubjects)*100;
+
+    printf("\nProgress : %.2f%%\n",progress);
+}
+
+int main(){
+    int choice;
+
+    while(1){
+        printf("\n===== EXAM COUNTDOWN PLANNER =====\n");
+
+        printf("1. Add Subjects\n");
+        printf("2. Set Exam Countdown\n");
+        printf("3. Set Study Hours\n");
+        printf("4. Generate Study Day Summary\n");
+        printf("5. View Countdown\n");
+        printf("6. Track Progress\n");
+        printf("7. Exit\n");
+
+        printf("\nEnter Your Choice: ");
+        scanf("%d",&choice);
+
+        switch(choice){
+            case 1:addSubjects();break;
+            case 2:setExamDate();break;
+            case 3:setStudyHours();break;
+            case 4:generateStudyPlan();break;
+            case 5:viewCountdown();break;
+            case 6:markProgress();break;
+
+            case 7:
+                printf("\nThank You For Using Exam Countdown Planner!\n");
+                return 0;
+
+            default:printf("\nInvalid Choice!\n");
+        }
+    }
+
+    return 0;
+}
